@@ -19,11 +19,11 @@ public class Board {
             for(int col = 0; col < MAX_COL; col++) {
                 
                 if(c == 0) {
-                    g2.setColor(new Color(210,165,125));
+                    g2.setColor(new Color(255,165,79));
                     c = 1;
                 }
                 else {
-                    g2.setColor(new Color(175,115,70));
+                    g2.setColor(new Color(139,69,0));
                     c = 0;
                 }
                 g2.fillRect(col*SQUARE_SIZE, row*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
