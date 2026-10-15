@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import javax.swing.JPanel;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.util.ArrayList;
 
 import move_piece.Bishop;
@@ -16,6 +17,7 @@ import  move_piece.Piece;
 import move_piece.Queen;
 import move_piece.Rook;
 import java.awt.AlphaComposite;
+import java.awt.Font;
 
 public class GamePanel extends JPanel implements Runnable{
 
@@ -157,6 +159,8 @@ public class GamePanel extends JPanel implements Runnable{
                     // Update the piece list in case a piece has been captured and removed during the simulation
                     copyPieces(simPieces, pieces);
                     activeP.updatePosition();
+
+                    changePlayer();
                 }
                 else {
                     // The move is not valid so reset everything
@@ -195,6 +199,18 @@ public class GamePanel extends JPanel implements Runnable{
             validSquare = true;
         }
     }
+
+    public void changePlayer() {
+
+        if(currentColor == WHITE) {
+            currentColor = BLACK;
+        }
+        else {
+            currentColor = WHITE;
+        }
+        activeP = null;
+    }
+
     @Override 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -231,6 +247,22 @@ public class GamePanel extends JPanel implements Runnable{
             // Draw the active piece in the end
             // so it won't be hidden by other pieces
             activeP.draw(g2);
+        }
+
+        // STATUS MESSAGES
+        g2.setRenderingHint(
+            RenderingHints.KEY_TEXT_ANTIALIASING,
+            RenderingHints.VALUE_TEXT_ANTIALIAS_ON
+        );
+
+        g2.setFont(new Font("Book antiqua", Font.PLAIN, 40));
+        g2.setColor(Color.white);
+
+        if(currentColor == WHITE) {
+            g2.drawString("White's turn", 840, 250);
+        }
+        else {
+            g2.drawString("Black's turn", 840, 250);
         }
     }
 }
