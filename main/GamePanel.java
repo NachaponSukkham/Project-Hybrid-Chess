@@ -53,7 +53,8 @@ public class GamePanel extends JPanel implements Runnable{
         addMouseListener(mouse);
 
         //setPieces();
-        testPromotion();
+        //testPromotion();
+        testIllegal();
         copyPieces(pieces, simPieces);
     }
 
@@ -102,6 +103,13 @@ public class GamePanel extends JPanel implements Runnable{
     public void  testPromotion() {
         pieces.add (new Pawn(WHITE,0,3));
         pieces.add (new Pawn(BLACK,5,4));
+    }
+    public void  testIllegal() {
+        pieces.add (new Pawn(WHITE,7,6));
+        pieces.add (new King(WHITE,3,7));
+        pieces.add (new Pawn(BLACK,0,3));
+        pieces.add (new Bishop(BLACK,1,4));
+        pieces.add (new Queen(BLACK,4,5));
     }
     private void copyPieces(ArrayList<Piece> source, ArrayList<Piece> target) {
 
@@ -228,8 +236,22 @@ public class GamePanel extends JPanel implements Runnable{
 
             checkCastling();
 
-            validSquare = true;
+            if(isIllegal(activeP) == false) {
+                validSquare = true;
+            }
         }
+    }
+    private boolean isIllegal(Piece king) {
+
+        if (king.type == Type.KING) {
+            for (Piece piece : simPieces) {
+                if (piece != king && piece.color != king.color
+                        && piece.canMove(king.col, king.row)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void checkCastling() {
@@ -326,22 +348,48 @@ public class GamePanel extends JPanel implements Runnable{
         }
 
         if (activeP != null) {
-            if(canMove) {
-                g2.setColor(Color.white);
-                g2.setComposite(
-                    AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f)
-                );
+            if (canMove) {
+                if (isIllegal(activeP)) {
+                    g2.setColor(Color.red);
+                    g2.setComposite(
+                        AlphaComposite.getInstance(
+                            AlphaComposite.SRC_OVER, 0.7f
+                        )
+                    );
 
-                g2.fillRect(
-                    activeP.col * Board.SQUARE_SIZE,
-                    activeP.row * Board.SQUARE_SIZE,
-                    Board.SQUARE_SIZE,
-                    Board.SQUARE_SIZE
-                );
+                    g2.fillRect(
+                        activeP.col * Board.SQUARE_SIZE,
+                        activeP.row * Board.SQUARE_SIZE,
+                        Board.SQUARE_SIZE,
+                        Board.SQUARE_SIZE
+                    );
 
-                g2.setComposite(
-                    AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f)
-                );
+                    g2.setComposite(
+                        AlphaComposite.getInstance(
+                            AlphaComposite.SRC_OVER, 1f
+                        )
+                    );
+                } else {
+                    g2.setColor(Color.white);
+                    g2.setComposite(
+                        AlphaComposite.getInstance(
+                            AlphaComposite.SRC_OVER, 0.7f
+                        )
+                    );
+
+                    g2.fillRect(
+                        activeP.col * Board.SQUARE_SIZE,
+                        activeP.row * Board.SQUARE_SIZE,
+                        Board.SQUARE_SIZE,
+                        Board.SQUARE_SIZE
+                    );
+
+                    g2.setComposite(
+                        AlphaComposite.getInstance(
+                            AlphaComposite.SRC_OVER, 1f
+                        )
+                    );
+                }
             }
             // Draw the active piece in the end
             // so it won't be hidden by other pieces
