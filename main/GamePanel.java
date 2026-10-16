@@ -12,13 +12,13 @@ import move_piece.Bishop;
 import move_piece.King;
 import move_piece.Knight;
 import move_piece.Pawn;
-//import javax.swing.JPanel;
 import  move_piece.Piece;
 import move_piece.Queen;
 import move_piece.Rook;
 import java.awt.AlphaComposite;
 import java.awt.Font;
-//import java.awt.image.BufferedImage;
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
 
 public class GamePanel extends JPanel implements Runnable{
 
@@ -49,16 +49,107 @@ public class GamePanel extends JPanel implements Runnable{
     boolean stalemate;
 
     public GamePanel() {
-        setPreferredSize (new Dimension(WIDTE,HEIGHT));
+        setPreferredSize(new Dimension(WIDTE, HEIGHT));
         setBackground(Color.black);
+
+        // + Allow manual positioning of buttons
+        setLayout(null);
+
         addMouseMotionListener(mouse);
         addMouseListener(mouse);
 
-        //setPieces();
-        //testPromotion();
-        testIllegal();
+        // + Clear old pieces before creating a new board
+        pieces.clear();
+        simPieces.clear();
+
+        // + Create a standard chess board
+        setPieces();
+
         copyPieces(pieces, simPieces);
+
+        // + Add Save, Continue and Reset buttons
+        addGameButtons();
     }
+
+    private void addGameButtons() {
+
+        JButton saveButton = new JButton("Save Game");
+        JButton continueButton = new JButton("Continue Game");
+        JButton resetButton = new JButton("Reset Game");
+
+        // Position the buttons on the right side
+        saveButton.setBounds(840, 600, 220, 40);
+        continueButton.setBounds(840, 650, 220, 40);
+        resetButton.setBounds(840, 700, 220, 40);
+
+        // Save button
+        saveButton.addActionListener(e -> {
+            saveCurrentGame();
+            JOptionPane.showMessageDialog(
+                this, "Game saved successfully!"
+            );
+        });
+
+        // Continue button
+        continueButton.addActionListener(e -> {
+            if (continueSavedGame()) {
+                JOptionPane.showMessageDialog(
+                    this, "Game loaded successfully!"
+                );
+            } else {
+                JOptionPane.showMessageDialog(
+                    this, "No valid saved game found."
+                );
+            }
+        });
+
+        // Reset button
+        resetButton.addActionListener(e -> {
+            int choice = JOptionPane.showConfirmDialog(
+                this,
+                "Start a new game? Unsaved progress will be lost.",
+                "Reset Game",
+                JOptionPane.YES_NO_OPTION
+            );
+
+            if (choice == JOptionPane.YES_OPTION) {
+                resetGame();
+            }
+        });
+
+        add(saveButton);
+        add(continueButton);
+        add(resetButton);
+    }
+    
+    private void resetGame() {
+
+        // Clear all pieces
+        pieces.clear();
+        simPieces.clear();
+
+        // Reset the board
+        setPieces();
+        copyPieces(pieces, simPieces);
+
+        // Reset the turn
+        currentColor = WHITE;
+
+        // Reset selected piece and special states
+        activeP = null;
+        checkingP = null;
+        castlingP = null;
+
+        canMove = false;
+        validSquare = false;
+        promotion = false;
+        gameover = false;
+        stalemate = false;
+
+        // Refresh the screen
+        repaint();
+    }
+
 
     public void launchGame() {
         gameThread = new Thread(this);
@@ -572,6 +663,13 @@ public class GamePanel extends JPanel implements Runnable{
             }
         }
     }
+    public void saveCurrentGame() {
+        GameSave.saveGame(pieces, currentColor);
+    }
+
+    public boolean continueSavedGame() {
+        return GameSave.loadGame(this);
+    }
 
     @Override 
     public void paintComponent(Graphics g) {
@@ -658,16 +756,16 @@ public class GamePanel extends JPanel implements Runnable{
                 g2.drawString("White's turn", 840, 250);
                 if(checkingP != null && checkingP.color == BLACK) {
                     g2.setColor(Color.red);
-                    g2.drawString("The King", 840, 650);
-                    g2.drawString("is in check", 840, 700);
+                    g2.drawString("The King", 840, 150);
+                    g2.drawString("is in check", 840, 200);
                 }
             }
             else {
                 g2.drawString("Black's turn", 840, 250);
                 if(checkingP != null && checkingP.color == WHITE) {
                     g2.setColor(Color.red);
-                    g2.drawString("The King", 840, 650);
-                    g2.drawString("is in check", 840, 700);
+                    g2.drawString("The King", 840, 150);
+                    g2.drawString("is in check", 840, 200);
                 }
             }
         }
